@@ -1,0 +1,169 @@
+@model DestekTalebiYonetimi.Models.DestekTalebi
+
+@{
+    ViewData["Title"] = "Destek Talebi Detayı";
+}
+
+<h2>Destek Talebi Detayı</h2>
+
+<div class="mb-3">
+    <a class="btn btn-secondary" asp-controller="Destek" asp-action="Index">
+        Listeye Dön
+    </a>
+</div>
+
+<div class="row">
+
+    <div class="col-md-7">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Talep Bilgileri</strong>
+            </div>
+
+            <div class="card-body">
+                <h4>@Model.Baslik</h4>
+
+                <hr />
+
+                <p>
+                    <strong>Talep No:</strong> @Model.Id
+                </p>
+
+                <p>
+                    <strong>Açıklama:</strong><br />
+                    @Model.Aciklama
+                </p>
+
+                <p>
+                    <strong>Birim:</strong> @Model.Birim
+                </p>
+
+                <p>
+                    <strong>Talep Eden Personel:</strong> @Model.TalepEden
+                </p>
+
+                <p>
+                    <strong>Dahili Numara:</strong> @Model.DahiliNumara
+                </p>
+
+                <p>
+                    <strong>İlgili Sistem:</strong> @Model.IlgiliSistem
+                </p>
+
+                <p>
+                    <strong>Talep Türü:</strong> @Model.TalepTuru
+                </p>
+
+                <p>
+                    <strong>Öncelik:</strong>
+                    @if (Model.Oncelik == "Acil")
+                    {
+                        <span class="badge bg-danger">Acil</span>
+                    }
+                    else if (Model.Oncelik == "Yüksek")
+                    {
+                        <span class="badge bg-warning text-dark">Yüksek</span>
+                    }
+                    else if (Model.Oncelik == "Normal")
+                    {
+                        <span class="badge bg-primary">Normal</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Düşük</span>
+                    }
+                </p>
+
+                <p>
+                    <strong>Oluşturulma Tarihi:</strong>
+                    @Model.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Çözüm Süreci</strong>
+            </div>
+
+            <div class="card-body">
+                <p>
+                    <strong>Mevcut Durum:</strong>
+
+                    @if (Model.Durum == "Bekliyor")
+                    {
+                        <span class="badge bg-warning text-dark">Bekliyor</span>
+                    }
+                    else if (Model.Durum == "İşlemde")
+                    {
+                        <span class="badge bg-info text-dark">İşlemde</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Çözüldü</span>
+                    }
+                </p>
+
+                @if (Model.Durum == "Bekliyor")
+                {
+                    <div class="alert alert-warning">
+                        Bu destek talebi henüz işleme alınmamıştır.
+                    </div>
+
+                    <a class="btn btn-warning w-100 mb-2"
+                       asp-controller="Destek"
+                       asp-action="IslemeAl"
+                       asp-route-id="@Model.Id">
+                        İşleme Al
+                    </a>
+                }
+                else if (Model.Durum == "İşlemde")
+                {
+                    <div class="alert alert-info">
+                        Bu destek talebi bilgi işlem tarafından incelenmektedir.
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success">
+                        Bu destek talebi çözüme kavuşturulmuştur.
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.CozumAciklamasi))
+                {
+                    <div class="mt-3">
+                        <strong>Çözüm Açıklaması:</strong>
+                        <div class="border rounded p-3 mt-2 bg-light">
+                            @Model.CozumAciklamasi
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Durum != "Çözüldü")
+                {
+                    <hr />
+
+                    <form asp-controller="Destek" asp-action="CozulduYap" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Çözüm Açıklaması</label>
+                            <textarea name="cozumAciklamasi"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Örn: Kullanıcının hesabı aktif hale getirildi ve giriş kontrolü sağlandı."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            Çözüldü Yap
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>

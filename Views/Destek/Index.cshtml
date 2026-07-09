@@ -1,0 +1,188 @@
+@model List<DestekTalebiYonetimi.Models.DestekTalebi>
+
+@{
+    ViewData["Title"] = "Destek Talepleri";
+}
+
+<h2>Destek Talebi Yönetimi</h2>
+
+<p class="text-muted">
+    Belediye personelinin yaşadığı sistem girişi, kullanıcı yetkisi, uygulama hatası ve otomasyon kaynaklı destek talepleri bu ekrandan takip edilir.
+</p>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a asp-controller="Destek" asp-action="Index" class="text-decoration-none text-dark">
+            <div class="card text-center border-primary shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Toplam Talep</h5>
+                    <h3>@ViewBag.ToplamTalep</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-controller="Destek" asp-action="Index" asp-route-durum="Bekliyor" class="text-decoration-none text-dark">
+            <div class="card text-center border-warning shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Bekleyen</h5>
+                    <h3>@ViewBag.BekleyenTalep</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-controller="Destek" asp-action="Index" asp-route-durum="İşlemde" class="text-decoration-none text-dark">
+            <div class="card text-center border-info shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">İşlemde</h5>
+                    <h3>@ViewBag.IslemdekiTalep</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a asp-controller="Destek" asp-action="Index" asp-route-durum="Çözüldü" class="text-decoration-none text-dark">
+            <div class="card text-center border-success shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Çözülen</h5>
+                    <h3>@ViewBag.CozulenTalep</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.SeciliDurum))
+{
+    <div class="alert alert-secondary">
+        Şu an sadece <strong>@ViewBag.SeciliDurum</strong> durumundaki destek talepleri listeleniyor.
+        <a asp-controller="Destek" asp-action="Index" class="ms-2">Tümünü göster</a>
+    </div>
+}
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-controller="Destek" asp-action="Index" method="get" class="row g-2">
+            <div class="col-md-9">
+                <input type="text"
+                       name="arama"
+                       value="@ViewBag.Arama"
+                       class="form-control"
+                       placeholder="Başlık, açıklama, birim, talep eden, ilgili sistem veya talep türü ara..." />
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-dark w-100">
+                    Ara
+                </button>
+            </div>
+        </form>
+
+        @if (!string.IsNullOrWhiteSpace(ViewBag.Arama))
+        {
+            <div class="mt-3 alert alert-light border">
+                Arama sonucu: <strong>@ViewBag.Arama</strong>
+                <a asp-controller="Destek" asp-action="Index" class="ms-2">Aramayı temizle</a>
+            </div>
+        }
+    </div>
+</div>
+
+<a class="btn btn-primary mb-3" asp-controller="Destek" asp-action="Ekle">
+    Yeni Destek Talebi Oluştur
+</a>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">
+        Kriterlere uygun destek talebi bulunmamaktadır.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Başlık</th>
+                <th>Birim</th>
+                <th>İlgili Sistem</th>
+                <th>Talep Türü</th>
+                <th>Öncelik</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var talep in Model)
+            {
+                <tr>
+                    <td>@talep.Id</td>
+                    <td>@talep.Baslik</td>
+                    <td>@talep.Birim</td>
+                    <td>@talep.IlgiliSistem</td>
+                    <td>@talep.TalepTuru</td>
+
+                    <td>
+                        @if (talep.Oncelik == "Acil")
+                        {
+                            <span class="badge bg-danger">Acil</span>
+                        }
+                        else if (talep.Oncelik == "Yüksek")
+                        {
+                            <span class="badge bg-warning text-dark">Yüksek</span>
+                        }
+                        else if (talep.Oncelik == "Normal")
+                        {
+                            <span class="badge bg-primary">Normal</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Düşük</span>
+                        }
+                    </td>
+
+                    <td>
+                        @if (talep.Durum == "Bekliyor")
+                        {
+                            <span class="badge bg-warning text-dark">Bekliyor</span>
+                        }
+                        else if (talep.Durum == "İşlemde")
+                        {
+                            <span class="badge bg-info text-dark">İşlemde</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Çözüldü</span>
+                        }
+                    </td>
+
+                    <td>@talep.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+
+                    <td>
+                        <a class="btn btn-sm btn-info" asp-controller="Destek" asp-action="Detay" asp-route-id="@talep.Id">
+                            Detay
+                        </a>
+
+                        <a class="btn btn-sm btn-secondary" asp-controller="Destek" asp-action="Duzenle" asp-route-id="@talep.Id">
+                            Düzenle
+                        </a>
+
+                        @if (talep.Durum == "Bekliyor")
+                        {
+                            <a class="btn btn-sm btn-warning" asp-controller="Destek" asp-action="IslemeAl" asp-route-id="@talep.Id">
+                                İşleme Al
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

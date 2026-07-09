@@ -1,0 +1,103 @@
+@model DestekTalebiYonetimi.Models.DestekTalebi
+
+@{
+    ViewData["Title"] = "Yeni Destek Talebi";
+}
+
+<h2>Yeni Destek Talebi Oluştur</h2>
+
+<p class="text-muted">
+    Sistem girişi, kullanıcı yetkisi, uygulama hatası ve belediye otomasyonlarında yaşanan destek ihtiyaçları için talep oluşturabilirsiniz.
+</p>
+
+<form asp-controller="Destek" asp-action="Ekle" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Baslik" class="form-label">Talep Başlığı</label>
+        <input asp-for="Baslik" class="form-control" placeholder="Örn: Sisteme giriş yapamıyorum" />
+        <span asp-validation-for="Baslik" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Aciklama" class="form-label">Açıklama</label>
+        <textarea asp-for="Aciklama" class="form-control" rows="4"
+                  placeholder="Örn: Şifremi doğru girmeme rağmen sistem hata veriyor. Giriş ekranında kullanıcı bulunamadı uyarısı alıyorum."></textarea>
+        <span asp-validation-for="Aciklama" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Birim" class="form-label">Birim</label>
+        <select asp-for="Birim" class="form-select">
+            <option value="">Birim seçiniz</option>
+            <option value="Bilgi İşlem">Bilgi İşlem</option>
+            <option value="Mali Hizmetler">Mali Hizmetler</option>
+            <option value="İnsan Kaynakları">İnsan Kaynakları</option>
+            <option value="Yazı İşleri">Yazı İşleri</option>
+            <option value="Fen İşleri">Fen İşleri</option>
+            <option value="İmar ve Şehircilik">İmar ve Şehircilik</option>
+            <option value="Destek Hizmetleri">Destek Hizmetleri</option>
+            <option value="Kültür ve Sosyal İşler">Kültür ve Sosyal İşler</option>
+            <option value="Diğer">Diğer</option>
+        </select>
+        <span asp-validation-for="Birim" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TalepEden" class="form-label">Talep Eden Personel</label>
+        <input asp-for="TalepEden" class="form-control" placeholder="Örn: Ayşe Yılmaz" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DahiliNumara" class="form-label">Dahili Numara</label>
+        <input asp-for="DahiliNumara" class="form-control" placeholder="Örn: 1234" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="IlgiliSistem" class="form-label">İlgili Sistem</label>
+        <select asp-for="IlgiliSistem" class="form-select">
+            <option value="EBYS">EBYS</option>
+            <option value="Belediye Otomasyon Sistemi">Belediye Otomasyon Sistemi</option>
+            <option value="Personel Sistemi">Personel Sistemi</option>
+            <option value="Muhasebe Sistemi">Muhasebe Sistemi</option>
+            <option value="E-İmza Sistemi">E-İmza Sistemi</option>
+            <option value="E-Posta">E-Posta</option>
+            <option value="Web Portal">Web Portal</option>
+            <option value="Diğer">Diğer</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TalepTuru" class="form-label">Talep Türü</label>
+        <select asp-for="TalepTuru" class="form-select">
+            <option value="Sistem Girişi">Sistem Girişi</option>
+            <option value="Şifre / Kullanıcı Problemi">Şifre / Kullanıcı Problemi</option>
+            <option value="Yetki Talebi">Yetki Talebi</option>
+            <option value="Uygulama Hatası">Uygulama Hatası</option>
+            <option value="E-İmza Problemi">E-İmza Problemi</option>
+            <option value="Veri Görüntüleme Sorunu">Veri Görüntüleme Sorunu</option>
+            <option value="Diğer">Diğer</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Oncelik" class="form-label">Öncelik</label>
+        <select asp-for="Oncelik" class="form-select">
+            <option value="Düşük">Düşük</option>
+            <option value="Normal" selected>Normal</option>
+            <option value="Yüksek">Yüksek</option>
+            <option value="Acil">Acil</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Talebi Kaydet
+    </button>
+
+    <a class="btn btn-secondary" asp-controller="Destek" asp-action="Index">
+        Listeye Dön
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
