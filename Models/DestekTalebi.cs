@@ -28,6 +28,7 @@ public class DestekTalebi
 
     public string Durum { get; set; } = "Bekliyor";
 
+public string? OlusturanKullanici { get; set; }
     public string CozumAciklamasi { get; set; } = string.Empty;
 
     public DateTime OlusturulmaTarihi { get; set; } = DateTime.Now;

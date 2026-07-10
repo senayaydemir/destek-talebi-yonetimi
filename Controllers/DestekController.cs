@@ -50,10 +50,11 @@ public class DestekController : Controller
         return View(talepler);
     }
 
-    public IActionResult Ekle()
-    {
-        return View();
-    }
+ public IActionResult Ekle()
+{
+    ViewBag.Kullanici = HttpContext.Session.GetString("KullaniciAdi");
+    return View();
+}
 
     [HttpPost]
     public IActionResult Ekle(DestekTalebi destekTalebi)
@@ -65,6 +66,7 @@ public class DestekController : Controller
 
         destekTalebi.Durum = "Bekliyor";
         destekTalebi.OlusturulmaTarihi = DateTime.Now;
+        destekTalebi.OlusturanKullanici = HttpContext.Session.GetString("KullaniciAdi");
 
         _context.DestekTalepleri.Add(destekTalebi);
         _context.SaveChanges();

@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h3>Destek Talebi Yönetimi</h3>
+            </div>
+
+            <div class="card-body">
+
+                @if (ViewBag.Hata != null)
+                {
+                    <div class="alert alert-danger">
+                        @ViewBag.Hata
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input type="text"
+                               name="kullaniciAdi"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Şifre</label>
+                        <input type="password"
+                               name="sifre"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <button class="btn btn-primary w-100">
+                        Giriş Yap
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

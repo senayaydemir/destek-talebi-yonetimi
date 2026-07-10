@@ -9,6 +9,6 @@ public class AppDbContext : DbContext
         : base(options)
     {
     }
-
+public DbSet<Kullanici> Kullanicilar { get; set; }
     public DbSet<DestekTalebi> DestekTalepleri { get; set; } = null!;
 }
