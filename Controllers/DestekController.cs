@@ -1,7 +1,9 @@
 using DestekTalebiYonetimi.Data;
 using DestekTalebiYonetimi.Models;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Http; 
+using ClosedXML.Excel;
+using System.IO;
 namespace DestekTalebiYonetimi.Controllers;
 
 public class DestekController : Controller
@@ -15,9 +17,18 @@ public class DestekController : Controller
 
     public IActionResult Index(string? durum, string? arama)
     {
-        var taleplerQuery = _context.DestekTalepleri
-            .OrderByDescending(x => x.OlusturulmaTarihi)
-            .AsQueryable();
+       var rol = HttpContext.Session.GetString("Rol");
+var kullanici = HttpContext.Session.GetString("KullaniciAdi");
+
+var taleplerQuery = _context.DestekTalepleri.AsQueryable();
+
+if (rol == "Personel")
+{
+    taleplerQuery = taleplerQuery.Where(x => x.OlusturanKullanici == kullanici);
+}
+
+taleplerQuery = taleplerQuery
+    .OrderByDescending(x => x.OlusturulmaTarihi);
 
         var tumTalepler = _context.DestekTalepleri.ToList();
 
@@ -28,6 +39,8 @@ public class DestekController : Controller
 
         ViewBag.SeciliDurum = durum;
         ViewBag.Arama = arama;
+        ViewBag.Rol = HttpContext.Session.GetString("Rol");
+ViewBag.Kullanici = HttpContext.Session.GetString("KullaniciAdi");
 
         if (!string.IsNullOrEmpty(durum))
         {
@@ -56,24 +69,46 @@ public class DestekController : Controller
     return View();
 }
 
-    [HttpPost]
-    public IActionResult Ekle(DestekTalebi destekTalebi)
+[HttpPost]
+public IActionResult Ekle(DestekTalebi destekTalebi, IFormFile? dosya)
+{
+    if (!ModelState.IsValid)
     {
-        if (!ModelState.IsValid)
-        {
-            return View(destekTalebi);
-        }
-
-        destekTalebi.Durum = "Bekliyor";
-        destekTalebi.OlusturulmaTarihi = DateTime.Now;
-        destekTalebi.OlusturanKullanici = HttpContext.Session.GetString("KullaniciAdi");
-
-        _context.DestekTalepleri.Add(destekTalebi);
-        _context.SaveChanges();
-
-        return RedirectToAction("Index");
+        return View(destekTalebi);
     }
 
+    if (dosya != null && dosya.Length > 0)
+    {
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dosya.FileName);
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            dosya.CopyTo(stream);
+        }
+destekTalebi.DosyaAdi = dosya.FileName;
+destekTalebi.DosyaYolu = "/uploads/" + fileName;
+destekTalebi.DosyaBoyutu = dosya.Length;
+destekTalebi.DosyaYuklenmeTarihi = DateTime.Now;
+
+    }
+
+    destekTalebi.Durum = "Bekliyor";
+    destekTalebi.OlusturulmaTarihi = DateTime.Now;
+    destekTalebi.OlusturanKullanici = HttpContext.Session.GetString("KullaniciAdi");
+
+    _context.DestekTalepleri.Add(destekTalebi);
+    _context.SaveChanges();
+
+    return RedirectToAction("Index");
+}
     public IActionResult Detay(int id)
     {
         var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
@@ -85,22 +120,34 @@ public class DestekController : Controller
 
         return View(talep);
     }
+public IActionResult Duzenle(int id)
+{
+    var rol = HttpContext.Session.GetString("Rol");
 
-    public IActionResult Duzenle(int id)
+    if (rol != "BilgiIslem")
     {
-        var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
-
-        if (talep == null)
-        {
-            return NotFound();
-        }
-
-        return View(talep);
+        return RedirectToAction("Index");
     }
 
+    var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
+
+    if (talep == null)
+    {
+        return NotFound();
+    }
+
+    return View(talep);
+}
     [HttpPost]
+    
     public IActionResult Duzenle(DestekTalebi guncelTalep)
     {
+        var rol = HttpContext.Session.GetString("Rol");
+
+if (rol != "BilgiIslem")
+{
+    return RedirectToAction("Index");
+}
         if (!ModelState.IsValid)
         {
             return View(guncelTalep);
@@ -127,22 +174,36 @@ public class DestekController : Controller
         return RedirectToAction("Detay", new { id = mevcutTalep.Id });
     }
 
-    public IActionResult IslemeAl(int id)
+public IActionResult IslemeAl(int id)
+{
+    var rol = HttpContext.Session.GetString("Rol");
+
+    if (rol != "BilgiIslem")
     {
-        var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
-
-        if (talep != null)
-        {
-            talep.Durum = "İşlemde";
-            _context.SaveChanges();
-        }
-
         return RedirectToAction("Index");
     }
+
+    var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
+
+    if (talep != null)
+    {
+        talep.Durum = "İşlemde";
+        _context.SaveChanges();
+    }
+
+    return RedirectToAction("Index");
+}
 
     [HttpPost]
     public IActionResult CozulduYap(int id, string cozumAciklamasi)
     {
+
+        var rol = HttpContext.Session.GetString("Rol");
+
+if (rol != "BilgiIslem")
+{
+    return RedirectToAction("Index");
+}
         var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
 
         if (talep != null)
@@ -154,4 +215,62 @@ public class DestekController : Controller
 
         return RedirectToAction("Index");
     }
+    public IActionResult ExceleAktar()
+{
+    var rol = HttpContext.Session.GetString("Rol");
+
+if (rol != "BilgiIslem" && rol != "Yonetici")
+{
+    return RedirectToAction("Index");
+}
+    var talepler = _context.DestekTalepleri
+        .OrderByDescending(x => x.OlusturulmaTarihi)
+        .ToList();
+
+    using (var workbook = new XLWorkbook())
+    {
+        var worksheet = workbook.Worksheets.Add("Destek Talepleri");
+
+        worksheet.Cell(1, 1).Value = "Talep No";
+        worksheet.Cell(1, 2).Value = "Başlık";
+        worksheet.Cell(1, 3).Value = "Birim";
+        worksheet.Cell(1, 4).Value = "Talep Eden";
+        worksheet.Cell(1, 5).Value = "İlgili Sistem";
+        worksheet.Cell(1, 6).Value = "Talep Türü";
+        worksheet.Cell(1, 7).Value = "Öncelik";
+        worksheet.Cell(1, 8).Value = "Durum";
+        worksheet.Cell(1, 9).Value = "Oluşturan Kullanıcı";
+        worksheet.Cell(1, 10).Value = "Oluşturulma Tarihi";
+
+        int satir = 2;
+
+        foreach (var talep in talepler)
+        {
+            worksheet.Cell(satir, 1).Value = talep.Id;
+            worksheet.Cell(satir, 2).Value = talep.Baslik;
+            worksheet.Cell(satir, 3).Value = talep.Birim;
+            worksheet.Cell(satir, 4).Value = talep.TalepEden;
+            worksheet.Cell(satir, 5).Value = talep.IlgiliSistem;
+            worksheet.Cell(satir, 6).Value = talep.TalepTuru;
+            worksheet.Cell(satir, 7).Value = talep.Oncelik;
+            worksheet.Cell(satir, 8).Value = talep.Durum;
+            worksheet.Cell(satir, 9).Value = talep.OlusturanKullanici;
+            worksheet.Cell(satir, 10).Value = talep.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm");
+
+            satir++;
+        }
+
+        worksheet.Columns().AdjustToContents();
+
+        using (var stream = new MemoryStream())
+        {
+            workbook.SaveAs(stream);
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"DestekTalepleri_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+        }
+    }
+}
 }

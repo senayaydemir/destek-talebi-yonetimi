@@ -32,4 +32,12 @@ public string? OlusturanKullanici { get; set; }
     public string CozumAciklamasi { get; set; } = string.Empty;
 
     public DateTime OlusturulmaTarihi { get; set; } = DateTime.Now;
+
+    public string? DosyaAdi { get; set; }
+
+public string? DosyaYolu { get; set; }
+
+public long? DosyaBoyutu { get; set; }
+
+public DateTime? DosyaYuklenmeTarihi { get; set; }
 }

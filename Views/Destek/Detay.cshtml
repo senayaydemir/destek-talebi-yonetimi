@@ -3,8 +3,11 @@
 @{
     ViewData["Title"] = "Destek Talebi Detayı";
 }
-
+<h4 style="color:red">
+Rol: @Context.Session.GetString("Rol")
+</h4>
 <h2>Destek Talebi Detayı</h2>
+<p><strong>Rol:</strong> @Context.Session.GetString("Rol")</p>
 
 <div class="mb-3">
     <a class="btn btn-secondary" asp-controller="Destek" asp-action="Index">
@@ -25,37 +28,26 @@
 
                 <hr />
 
-                <p>
-                    <strong>Talep No:</strong> @Model.Id
-                </p>
+                <p><strong>Talep No:</strong> @Model.Id</p>
 
                 <p>
                     <strong>Açıklama:</strong><br />
                     @Model.Aciklama
                 </p>
 
-                <p>
-                    <strong>Birim:</strong> @Model.Birim
-                </p>
+                <p><strong>Birim:</strong> @Model.Birim</p>
 
-                <p>
-                    <strong>Talep Eden Personel:</strong> @Model.TalepEden
-                </p>
+                <p><strong>Talep Eden Personel:</strong> @Model.TalepEden</p>
 
-                <p>
-                    <strong>Dahili Numara:</strong> @Model.DahiliNumara
-                </p>
+                <p><strong>Dahili Numara:</strong> @Model.DahiliNumara</p>
 
-                <p>
-                    <strong>İlgili Sistem:</strong> @Model.IlgiliSistem
-                </p>
+                <p><strong>İlgili Sistem:</strong> @Model.IlgiliSistem</p>
 
-                <p>
-                    <strong>Talep Türü:</strong> @Model.TalepTuru
-                </p>
+                <p><strong>Talep Türü:</strong> @Model.TalepTuru</p>
 
                 <p>
                     <strong>Öncelik:</strong>
+
                     @if (Model.Oncelik == "Acil")
                     {
                         <span class="badge bg-danger">Acil</span>
@@ -78,10 +70,61 @@
                     <strong>Oluşturulma Tarihi:</strong>
                     @Model.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm")
                 </p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.DosyaYolu))
+                {
+                    <hr />
+
+                    <h5>📎 Ekli Dosya</h5>
+
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width:180px;">Dosya Adı</th>
+                            <td>@Model.DosyaAdi</td>
+                        </tr>
+
+                        <tr>
+                            <th>Dosya Boyutu</th>
+                            <td>@($"{Model.DosyaBoyutu / 1024.0:F2} KB")</td>
+                        </tr>
+
+                        <tr>
+                            <th>Yüklenme Tarihi</th>
+                            <td>@Model.DosyaYuklenmeTarihi?.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    </table>
+
+                    <div class="mb-3">
+                        <a href="@Model.DosyaYolu"
+                           target="_blank"
+                           class="btn btn-primary">
+                            👁 Dosyayı Görüntüle
+                        </a>
+
+                        <a href="@Model.DosyaYolu"
+                           download
+                           class="btn btn-success">
+                            ⬇ Dosyayı İndir
+                        </a>
+                    </div>
+
+                    @if (Model.DosyaYolu.EndsWith(".jpg") ||
+                         Model.DosyaYolu.EndsWith(".jpeg") ||
+                         Model.DosyaYolu.EndsWith(".png") ||
+                         Model.DosyaYolu.EndsWith(".gif") ||
+                         Model.DosyaYolu.EndsWith(".webp"))
+                    {
+                        <img src="@Model.DosyaYolu"
+                             class="img-fluid rounded border"
+                             style="max-height:450px;" />
+                    }
+                }
+
             </div>
         </div>
     </div>
-
+@if (Context.Session.GetString("Rol") == "BilgiIslem")
+{
     <div class="col-md-5">
         <div class="card mb-3">
             <div class="card-header bg-light">
@@ -89,6 +132,7 @@
             </div>
 
             <div class="card-body">
+
                 <p>
                     <strong>Mevcut Durum:</strong>
 
@@ -136,6 +180,7 @@
                 {
                     <div class="mt-3">
                         <strong>Çözüm Açıklaması:</strong>
+
                         <div class="border rounded p-3 mt-2 bg-light">
                             @Model.CozumAciklamasi
                         </div>
@@ -147,10 +192,12 @@
                     <hr />
 
                     <form asp-controller="Destek" asp-action="CozulduYap" method="post">
+
                         <input type="hidden" name="id" value="@Model.Id" />
 
                         <div class="mb-3">
                             <label class="form-label">Çözüm Açıklaması</label>
+
                             <textarea name="cozumAciklamasi"
                                       class="form-control"
                                       rows="4"
@@ -160,10 +207,55 @@
                         <button type="submit" class="btn btn-success w-100">
                             Çözüldü Yap
                         </button>
+
                     </form>
                 }
+
             </div>
         </div>
     </div>
+}
+else
+{
+    <div class="col-md-5">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Talep Durumu</strong>
+            </div>
+
+            <div class="card-body">
+
+                <p>
+                    <strong>Durum:</strong>
+
+                    @if (Model.Durum == "Bekliyor")
+                    {
+                        <span class="badge bg-warning text-dark">Bekliyor</span>
+                    }
+                    else if (Model.Durum == "İşlemde")
+                    {
+                        <span class="badge bg-info text-dark">İşlemde</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Çözüldü</span>
+                    }
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.CozumAciklamasi))
+                {
+                    <hr />
+
+                    <strong>Bilgi İşlem Açıklaması</strong>
+
+                    <div class="border rounded p-3 mt-2 bg-light">
+                        @Model.CozumAciklamasi
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+}
 
 </div>

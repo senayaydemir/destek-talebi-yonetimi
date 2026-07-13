@@ -11,7 +11,7 @@
     Sistem girişi, kullanıcı yetkisi, uygulama hatası ve belediye otomasyonlarında yaşanan destek ihtiyaçları için talep oluşturabilirsiniz.
 </p>
 
-<form asp-controller="Destek" asp-action="Ekle" method="post">
+<form asp-controller="Destek" asp-action="Ekle" method="post" enctype="multipart/form-data">
 
     <div class="mb-3">
         <label asp-for="Baslik" class="form-label">Talep Başlığı</label>
@@ -97,6 +97,14 @@
     <a class="btn btn-secondary" asp-controller="Destek" asp-action="Index">
         Listeye Dön
     </a>
+
+    <div class="mb-3">
+    <label class="form-label">Dosya Ekle</label>
+    <input type="file" name="dosya" class="form-control" />
+    <small class="text-muted">
+        Ekran görüntüsü, PDF, Word veya Excel dosyası yükleyebilirsiniz.
+    </small>
+</div> 
 </form>
 
 @section Scripts {

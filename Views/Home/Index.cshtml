@@ -2,55 +2,84 @@
     ViewData["Title"] = "Ana Sayfa";
 }
 
-<p>Kullanıcı: @ViewBag.Kullanici</p>
-<p>Rol: @ViewBag.Rol</p>
 <div class="text-center mb-4">
-    <h1 class="display-5">Destek Talebi Yönetimi</h1>
-    <p class="lead">
-        Belediye personelinin sistem, giriş, yetki ve uygulama kaynaklı destek taleplerini takip etmek için geliştirilmiştir.
-    </p>
+
+    @if (ViewBag.Rol == "Personel")
+    {
+        <h1 class="display-5">Destek Taleplerim</h1>
+
+        <p class="lead">
+            Oluşturduğunuz destek taleplerini buradan oluşturabilir ve durumlarını takip edebilirsiniz.
+        </p>
+    }
+    else
+    {
+        <h1 class="display-5">Destek Talebi Yönetimi</h1>
+
+        <p class="lead">
+            Belediye personelinin sistem, giriş, yetki ve uygulama kaynaklı destek taleplerini takip etmek için geliştirilmiştir.
+        </p>
+    }
+
 </div>
 
-<div class="row">
-    <div class="col-md-4">
+<div class="row @(ViewBag.Rol == "Personel" ? "justify-content-center" : "")">
+
+    <div class="@(ViewBag.Rol == "Personel" ? "col-md-5" : "col-md-4")">
         <div class="card text-center mb-3">
             <div class="card-body">
                 <h5 class="card-title">Talep Oluştur</h5>
+
                 <p class="card-text">
                     Personel yaşadığı sistemsel problemi destek talebi olarak iletebilir.
                 </p>
-                <a class="btn btn-primary" asp-controller="Destek" asp-action="Ekle">
+
+                <a class="btn btn-primary"
+                   asp-controller="Destek"
+                   asp-action="Ekle">
                     Yeni Talep Oluştur
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
+   <div class="@(ViewBag.Rol == "Personel" ? "col-md-5" : "col-md-4")">
         <div class="card text-center mb-3">
             <div class="card-body">
                 <h5 class="card-title">Talepleri Takip Et</h5>
+
                 <p class="card-text">
-                    Oluşturulan talepler bekliyor, işlemde ve çözüldü durumlarına göre takip edilir.
+                    Oluşturulan destek taleplerini görüntüleyebilir ve mevcut durumlarını takip edebilirsiniz.
                 </p>
-                <a class="btn btn-secondary" asp-controller="Destek" asp-action="Index">
+
+                <a class="btn btn-secondary"
+                   asp-controller="Destek"
+                   asp-action="Index">
                     Talepleri Görüntüle
                 </a>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card text-center mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Çözüm Süreci</h5>
-                <p class="card-text">
-                    Bilgi işlem personeli talepleri değerlendirir, işleme alır ve çözüm açıklaması ekler.
-                </p>
-                <a class="btn btn-success" asp-controller="Destek" asp-action="Index">
-                    Süreci Yönet
-                </a>
+    @if (ViewBag.Rol == "BilgiIslem" || ViewBag.Rol == "Yonetici")
+    {
+        <div class="col-md-4">
+            <div class="card text-center mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Çözüm Sürecini Yönet</h5>
+
+                    <p class="card-text">
+                        Gelen destek taleplerini inceleyebilir, işleme alabilir ve çözüm açıklaması ekleyebilirsiniz.
+                    </p>
+
+                    <a class="btn btn-success"
+                       asp-controller="Destek"
+                       asp-action="Index">
+                        Süreci Yönet
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    }
+
 </div>

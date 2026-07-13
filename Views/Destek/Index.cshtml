@@ -4,12 +4,30 @@
     ViewData["Title"] = "Destek Talepleri";
 }
 
-<h2>Destek Talebi Yönetimi</h2>
+@if (ViewBag.Rol == "Personel")
+{
+    <h2>Destek Taleplerim</h2>
+}
+else
+{
+    <h2>Destek Talebi Yönetimi</h2>
+}
 
-<p class="text-muted">
-    Belediye personelinin yaşadığı sistem girişi, kullanıcı yetkisi, uygulama hatası ve otomasyon kaynaklı destek talepleri bu ekrandan takip edilir.
-</p>
+@if (ViewBag.Rol == "Personel")
+{
+    <p class="text-muted">
+        Oluşturduğunuz destek taleplerini bu ekrandan takip edebilir ve durumlarını görüntüleyebilirsiniz.
+    </p>
+}
+else
+{
+    <p class="text-muted">
+        Belediye personelinin oluşturduğu destek talepleri bu ekrandan takip edilir ve yönetilir.
+    </p>
+}
 
+@if (ViewBag.Rol == "BilgiIslem" || ViewBag.Rol == "Yonetici")
+{
 <div class="row mb-4">
     <div class="col-md-3">
         <a asp-controller="Destek" asp-action="Index" class="text-decoration-none text-dark">
@@ -55,6 +73,7 @@
         </a>
     </div>
 </div>
+}
 
 @if (!string.IsNullOrEmpty(ViewBag.SeciliDurum))
 {
@@ -92,9 +111,24 @@
     </div>
 </div>
 
-<a class="btn btn-primary mb-3" asp-controller="Destek" asp-action="Ekle">
-    Yeni Destek Talebi Oluştur
-</a>
+<div class="d-flex justify-content-between mb-3">
+
+    <a class="btn btn-primary"
+       asp-controller="Destek"
+       asp-action="Ekle">
+        ➕ Yeni Destek Talebi Oluştur
+    </a>
+
+   @if (ViewBag.Rol == "BilgiIslem" || ViewBag.Rol == "Yonetici")
+{
+    <a class="btn btn-success"
+       asp-controller="Destek"
+       asp-action="ExceleAktar">
+        📊 Excel'e Aktar
+    </a>
+}
+
+</div>
 
 @if (Model == null || Model.Count == 0)
 {
@@ -115,7 +149,14 @@ else
                 <th>Öncelik</th>
                 <th>Durum</th>
                 <th>Tarih</th>
-                <th>İşlem</th>
+               @if (ViewBag.Rol == "Personel")
+{
+    <th>Detay</th>
+}
+else
+{
+    <th>İşlem</th>
+}
             </tr>
         </thead>
 
@@ -170,16 +211,25 @@ else
                             Detay
                         </a>
 
-                        <a class="btn btn-sm btn-secondary" asp-controller="Destek" asp-action="Duzenle" asp-route-id="@talep.Id">
-                            Düzenle
-                        </a>
+                        @if (ViewBag.Rol == "BilgiIslem")
+{
+    <a class="btn btn-sm btn-secondary"
+       asp-controller="Destek"
+       asp-action="Duzenle"
+       asp-route-id="@talep.Id">
+        Düzenle
+    </a>
+}
 
-                        @if (talep.Durum == "Bekliyor")
-                        {
-                            <a class="btn btn-sm btn-warning" asp-controller="Destek" asp-action="IslemeAl" asp-route-id="@talep.Id">
-                                İşleme Al
-                            </a>
-                        }
+                       @if (ViewBag.Rol == "BilgiIslem" && talep.Durum == "Bekliyor")
+{
+    <a class="btn btn-sm btn-warning"
+       asp-controller="Destek"
+       asp-action="IslemeAl"
+       asp-route-id="@talep.Id">
+        İşleme Al
+    </a>
+}
                     </td>
                 </tr>
             }
