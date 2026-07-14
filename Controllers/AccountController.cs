@@ -30,9 +30,9 @@ namespace DestekTalebiYonetimi.Controllers
                 ViewBag.Hata = "Kullanıcı adı veya şifre hatalı.";
                 return View();
             }
-
-            HttpContext.Session.SetString("KullaniciAdi", kullanici.KullaniciAdi);
-            HttpContext.Session.SetString("Rol", kullanici.Rol);
+HttpContext.Session.SetString("KullaniciAdi", kullanici.KullaniciAdi);
+HttpContext.Session.SetString("AdSoyad", kullanici.AdSoyad);
+HttpContext.Session.SetString("Rol", kullanici.Rol);
 
             return RedirectToAction("Index", "Home");
         }

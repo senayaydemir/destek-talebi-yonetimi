@@ -17,11 +17,27 @@
     <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid">
 
-            <a class="navbar-brand"
-               asp-controller="Home"
-               asp-action="Index">
-                Destek Talebi Yönetimi
-            </a>
+           <a class="navbar-brand d-flex align-items-center"
+   asp-controller="Home"
+   asp-action="Index">
+
+    <img src="~/images/cinarkent-logo.png"
+         alt="Çınarkent Belediyesi"
+         width="100"
+         height="100"
+         class="me-2" />
+
+    <div>
+        <div class="fw-bold">
+            Çınarkent Belediyesi
+        </div>
+
+        <small class="text-muted">
+            Bilgi İşlem Destek Sistemi
+        </small>
+    </div>
+
+</a>
 
             <button class="navbar-toggler"
                     type="button"
@@ -32,41 +48,41 @@
 
             <div class="collapse navbar-collapse" id="navbar">
 
-                <ul class="navbar-nav me-auto">
+              @if (Context.Session.GetString("KullaniciAdi") != null)
+{
+    <ul class="navbar-nav me-auto">
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-controller="Home"
-                           asp-action="Index">
-                            Ana Sayfa
-                        </a>
-                    </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Home"
+               asp-action="Index">
+                Ana Sayfa
+            </a>
+        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           asp-controller="Destek"
-                           asp-action="Index">
-                            Destek Talepleri
-                        </a>
-                    </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Destek"
+               asp-action="Index">
+                Destek Talepleri
+            </a>
+        </li>
 
-                </ul>
+    </ul>
+}
 
-                @if (Context.Session.GetString("KullaniciAdi") != null)
-                {
-                    <span class="me-3 fw-semibold">
-                        👤 @Context.Session.GetString("KullaniciAdi")
-                        (@Context.Session.GetString("Rol"))
-                    </span>
+@if (Context.Session.GetString("KullaniciAdi") != null)
+{
+    <span class="me-3 fw-semibold">
+        👤 @Context.Session.GetString("AdSoyad")
+    </span>
 
-                    <a class="btn btn-outline-danger btn-sm"
-                       asp-controller="Account"
-                       asp-action="Logout">
-                        Çıkış Yap
-                    </a>
-                }
-
-            </div>
+    <a class="btn btn-outline-danger btn-sm"
+       asp-controller="Account"
+       asp-action="Logout">
+        Çıkış Yap
+    </a>
+}       </div>
         </div>
     </nav>
 </header>
