@@ -72,7 +72,7 @@ public class DestekController : Controller
     }
 
     [HttpPost]
-    public IActionResult Ekle(DestekTalebi destekTalebi, IFormFile? dosya)
+    public IActionResult Ekle(DestekTalebi destekTalebi, List<IFormFile>? dosyalar)
     {
         if (HttpContext.Session.GetString("KullaniciAdi") == null)
         {
@@ -84,65 +84,94 @@ public class DestekController : Controller
             return View(destekTalebi);
         }
 
-        if (dosya != null && dosya.Length > 0)
+      
+destekTalebi.Durum = "Bekliyor";
+destekTalebi.OlusturulmaTarihi = DateTime.Now;
+destekTalebi.OlusturanKullanici = HttpContext.Session.GetString("KullaniciAdi");
+
+_context.DestekTalepleri.Add(destekTalebi);
+_context.SaveChanges();
+
+if (dosyalar != null)
+{
+    foreach (var dosya in dosyalar)
+    {
+        if (dosya.Length == 0)
+            continue;
+
+        var uploadsFolder = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot",
+            "uploads");
+
+        if (!Directory.Exists(uploadsFolder))
         {
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dosya.FileName);
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                dosya.CopyTo(stream);
-            }
-
-            destekTalebi.DosyaAdi = dosya.FileName;
-            destekTalebi.DosyaYolu = "/uploads/" + fileName;
-            destekTalebi.DosyaBoyutu = dosya.Length;
-            destekTalebi.DosyaYuklenmeTarihi = DateTime.Now;
+            Directory.CreateDirectory(uploadsFolder);
         }
 
-        destekTalebi.Durum = "Bekliyor";
-        destekTalebi.OlusturulmaTarihi = DateTime.Now;
-        destekTalebi.OlusturanKullanici = HttpContext.Session.GetString("KullaniciAdi");
+        var fileName = Guid.NewGuid() + Path.GetExtension(dosya.FileName);
 
-        _context.DestekTalepleri.Add(destekTalebi);
-        _context.SaveChanges();
+        var filePath = Path.Combine(uploadsFolder, fileName);
 
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            dosya.CopyTo(stream);
+        }
+
+        _context.DestekTalepDosyalari.Add(new DestekTalepDosya
+        {
+            DestekTalebiId = destekTalebi.Id,
+            DosyaAdi = dosya.FileName,
+            DosyaYolu = "/uploads/" + fileName,
+            DosyaBoyutu = dosya.Length,
+            DosyaTuru = Path.GetExtension(dosya.FileName),
+            YuklenmeTarihi = DateTime.Now
+        });
+    }
+
+    _context.SaveChanges();
+}
+
+return RedirectToAction("Index");
+    }
+
+public IActionResult Detay(int id)
+{
+    var rol = HttpContext.Session.GetString("Rol");
+    var kullanici = HttpContext.Session.GetString("KullaniciAdi");
+
+    var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
+
+    if (talep == null)
+    {
+        return NotFound();
+    }
+
+    if (rol == "Personel" && talep.OlusturanKullanici != kullanici)
+    {
         return RedirectToAction("Index");
     }
 
-    public IActionResult Detay(int id)
-    {
-       var rol = HttpContext.Session.GetString("Rol");
-var kullanici = HttpContext.Session.GetString("KullaniciAdi");
-
-var talep = _context.DestekTalepleri.FirstOrDefault(x => x.Id == id);
-
-if (talep == null)
+    var viewModel = new DestekDetayViewModel
 {
-    return NotFound();
+    Talep = talep,
+
+    Loglar = _context.DestekTalepLoglari
+        .Where(x => x.DestekTalebiId == id)
+        .OrderByDescending(x => x.Tarih)
+        .ToList(),
+
+    Dosyalar = _context.DestekTalepDosyalari
+        .Where(x => x.DestekTalebiId == id)
+        .OrderBy(x => x.YuklenmeTarihi)
+        .ToList()
+};
+
+return View(viewModel);
 }
 
-if (rol == "Personel" && talep.OlusturanKullanici != kullanici)
-{
-    return RedirectToAction("Index");
-}
 
-return View(talep);
-
-        if (talep == null)
-        {
-            return NotFound();
-        }
-
-        return View(talep);
-    }
+       
 
     public IActionResult Duzenle(int id)
     {
@@ -195,7 +224,7 @@ return View(talep);
         mevcutTalep.Oncelik = guncelTalep.Oncelik;
 
         _context.SaveChanges();
-
+LogEkle(mevcutTalep.Id, "Talep düzenlendi");
         return RedirectToAction("Detay", new { id = mevcutTalep.Id });
     }
 
@@ -214,6 +243,7 @@ return View(talep);
         {
             talep.Durum = "İşlemde";
             _context.SaveChanges();
+            LogEkle(talep.Id, "Talep işleme alındı");
         }
 
         return RedirectToAction("Index");
@@ -236,6 +266,7 @@ return View(talep);
             talep.Durum = "Çözüldü";
             talep.CozumAciklamasi = cozumAciklamasi ?? string.Empty;
             _context.SaveChanges();
+            LogEkle(talep.Id, "Talep çözüldü");
         }
 
         return RedirectToAction("Index");
@@ -249,6 +280,17 @@ return View(talep);
         {
             return RedirectToAction("Index");
         }
+        _context.KullaniciLoglari.Add(new KullaniciLog
+{
+    KullaniciAdi = HttpContext.Session.GetString("KullaniciAdi") ?? "",
+    AdSoyad = HttpContext.Session.GetString("AdSoyad") ?? "",
+    Rol = HttpContext.Session.GetString("Rol") ?? "",
+    Islem = "Excel raporu aldı",
+    Tarih = DateTime.Now,
+    IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString()
+});
+
+_context.SaveChanges();
 
         var talepler = _context.DestekTalepleri
             .OrderByDescending(x => x.OlusturulmaTarihi)
@@ -300,4 +342,16 @@ return View(talep);
             }
         }
     }
+    private void LogEkle(int talepId, string islem)
+{
+    _context.DestekTalepLoglari.Add(new DestekTalepLog
+    {
+        DestekTalebiId = talepId,
+        KullaniciAdi = HttpContext.Session.GetString("KullaniciAdi") ?? "",
+        Islem = islem,
+        Tarih = DateTime.Now
+    });
+
+    _context.SaveChanges();
+}
 }

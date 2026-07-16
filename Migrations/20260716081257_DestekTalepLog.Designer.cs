@@ -4,6 +4,7 @@ using DestekTalebiYonetimi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DestekTalebiYonetimi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260716081257_DestekTalepLog")]
+    partial class DestekTalepLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,42 +94,6 @@ namespace DestekTalebiYonetimi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DestekTalepleri");
-                });
-
-            modelBuilder.Entity("DestekTalebiYonetimi.Models.DestekTalepDosya", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DestekTalebiId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DosyaAdi")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("DosyaBoyutu")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("DosyaTuru")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DosyaYolu")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("YuklenmeTarihi")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DestekTalebiId");
-
-                    b.ToTable("DestekTalepDosyalari");
                 });
 
             modelBuilder.Entity("DestekTalebiYonetimi.Models.DestekTalepLog", b =>
@@ -224,22 +191,6 @@ namespace DestekTalebiYonetimi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("KullaniciLoglari");
-                });
-
-            modelBuilder.Entity("DestekTalebiYonetimi.Models.DestekTalepDosya", b =>
-                {
-                    b.HasOne("DestekTalebiYonetimi.Models.DestekTalebi", "DestekTalebi")
-                        .WithMany("Dosyalar")
-                        .HasForeignKey("DestekTalebiId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DestekTalebi");
-                });
-
-            modelBuilder.Entity("DestekTalebiYonetimi.Models.DestekTalebi", b =>
-                {
-                    b.Navigation("Dosyalar");
                 });
 #pragma warning restore 612, 618
         }

@@ -40,4 +40,6 @@ public string? DosyaYolu { get; set; }
 public long? DosyaBoyutu { get; set; }
 
 public DateTime? DosyaYuklenmeTarihi { get; set; }
-}
+public ICollection<DestekTalepDosya> Dosyalar { get; set; }
+    = new List<DestekTalepDosya>();
+    }

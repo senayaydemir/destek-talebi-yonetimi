@@ -1,4 +1,4 @@
-@model DestekTalebiYonetimi.Models.DestekTalebi
+@model DestekTalebiYonetimi.Models.DestekDetayViewModel
 
 @{
     ViewData["Title"] = "Destek Talebi Detayı";
@@ -24,39 +24,39 @@ Rol: @Context.Session.GetString("Rol")
             </div>
 
             <div class="card-body">
-                <h4>@Model.Baslik</h4>
+                <h4>@Model.Talep.Baslik</h4>
 
                 <hr />
 
-                <p><strong>Talep No:</strong> @Model.Id</p>
+                <p><strong>Talep No:</strong> @Model.Talep.Id</p>
 
                 <p>
                     <strong>Açıklama:</strong><br />
-                    @Model.Aciklama
+                    @Model.Talep.Aciklama
                 </p>
 
-                <p><strong>Birim:</strong> @Model.Birim</p>
+                <p><strong>Birim:</strong> @Model.Talep.Birim</p>
 
-                <p><strong>Talep Eden Personel:</strong> @Model.TalepEden</p>
+                <p><strong>Talep Eden Personel:</strong> @Model.Talep.TalepEden</p>
 
-                <p><strong>Dahili Numara:</strong> @Model.DahiliNumara</p>
+                <p><strong>Dahili Numara:</strong> @Model.Talep.DahiliNumara</p>
 
-                <p><strong>İlgili Sistem:</strong> @Model.IlgiliSistem</p>
+                <p><strong>İlgili Sistem:</strong> @Model.Talep.IlgiliSistem</p>
 
-                <p><strong>Talep Türü:</strong> @Model.TalepTuru</p>
+                <p><strong>Talep Türü:</strong> @Model.Talep.TalepTuru</p>
 
                 <p>
                     <strong>Öncelik:</strong>
 
-                    @if (Model.Oncelik == "Acil")
+                    @if (Model.Talep.Oncelik == "Acil")
                     {
                         <span class="badge bg-danger">Acil</span>
                     }
-                    else if (Model.Oncelik == "Yüksek")
+                    else if (Model.Talep.Oncelik == "Yüksek")
                     {
                         <span class="badge bg-warning text-dark">Yüksek</span>
                     }
-                    else if (Model.Oncelik == "Normal")
+                    else if (Model.Talep.Oncelik == "Normal")
                     {
                         <span class="badge bg-primary">Normal</span>
                     }
@@ -68,61 +68,85 @@ Rol: @Context.Session.GetString("Rol")
 
                 <p>
                     <strong>Oluşturulma Tarihi:</strong>
-                    @Model.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm")
+                    @Model.Talep.OlusturulmaTarihi.ToString("dd.MM.yyyy HH:mm")
                 </p>
+@if (Model.Dosyalar.Any())
+{
+    <hr />
 
-                @if (!string.IsNullOrWhiteSpace(Model.DosyaYolu))
-                {
-                    <hr />
+    <h5>📎 Ekli Dosyalar</h5>
 
-                    <h5>📎 Ekli Dosya</h5>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Dosya Adı</th>
+                <th>Tür</th>
+                <th>Boyut</th>
+                <th>Yüklenme Tarihi</th>
+                <th style="width:180px;">İşlem</th>
+            </tr>
+        </thead>
 
-                    <table class="table table-bordered">
-                        <tr>
-                            <th style="width:180px;">Dosya Adı</th>
-                            <td>@Model.DosyaAdi</td>
-                        </tr>
+        <tbody>
 
-                        <tr>
-                            <th>Dosya Boyutu</th>
-                            <td>@($"{Model.DosyaBoyutu / 1024.0:F2} KB")</td>
-                        </tr>
+        @foreach (var dosya in Model.Dosyalar)
+        {
+            <tr>
 
-                        <tr>
-                            <th>Yüklenme Tarihi</th>
-                            <td>@Model.DosyaYuklenmeTarihi?.ToString("dd.MM.yyyy HH:mm")</td>
-                        </tr>
-                    </table>
+                <td>@dosya.DosyaAdi</td>
 
-                    <div class="mb-3">
-                        <a href="@Model.DosyaYolu"
-                           target="_blank"
-                           class="btn btn-primary">
-                            👁 Dosyayı Görüntüle
-                        </a>
+                <td>@dosya.DosyaTuru</td>
 
-                        <a href="@Model.DosyaYolu"
-                           download
-                           class="btn btn-success">
-                            ⬇ Dosyayı İndir
-                        </a>
-                    </div>
+                <td>@($"{dosya.DosyaBoyutu / 1024.0:F2} KB")</td>
 
-                    @if (Model.DosyaYolu.EndsWith(".jpg") ||
-                         Model.DosyaYolu.EndsWith(".jpeg") ||
-                         Model.DosyaYolu.EndsWith(".png") ||
-                         Model.DosyaYolu.EndsWith(".gif") ||
-                         Model.DosyaYolu.EndsWith(".webp"))
-                    {
-                        <img src="@Model.DosyaYolu"
-                             class="img-fluid rounded border"
-                             style="max-height:450px;" />
-                    }
-                }
+                <td>@dosya.YuklenmeTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+
+                <td>
+
+                    <a href="@dosya.DosyaYolu"
+                       target="_blank"
+                       class="btn btn-primary btn-sm">
+                        👁 Görüntüle
+                    </a>
+
+                    <a href="@dosya.DosyaYolu"
+                       download
+                       class="btn btn-success btn-sm">
+                        ⬇ İndir
+                    </a>
+
+                </td>
+
+            </tr>
+
+            @if (dosya.DosyaTuru == ".jpg" ||
+                 dosya.DosyaTuru == ".jpeg" ||
+                 dosya.DosyaTuru == ".png" ||
+                 dosya.DosyaTuru == ".gif" ||
+                 dosya.DosyaTuru == ".webp")
+            {
+                <tr>
+                    <td colspan="5">
+
+                        <img src="@dosya.DosyaYolu"
+                             class="img-fluid rounded border mt-2"
+                             style="max-height:350px;" />
+
+                    </td>
+                </tr>
+            }
+
+        }
+
+        </tbody>
+
+    </table>
+}
 
             </div>
         </div>
     </div>
+
 @if (Context.Session.GetString("Rol") == "BilgiIslem")
 {
     <div class="col-md-5">
@@ -136,11 +160,11 @@ Rol: @Context.Session.GetString("Rol")
                 <p>
                     <strong>Mevcut Durum:</strong>
 
-                    @if (Model.Durum == "Bekliyor")
+                    @if (Model.Talep.Durum == "Bekliyor")
                     {
                         <span class="badge bg-warning text-dark">Bekliyor</span>
                     }
-                    else if (Model.Durum == "İşlemde")
+                    else if (Model.Talep.Durum == "İşlemde")
                     {
                         <span class="badge bg-info text-dark">İşlemde</span>
                     }
@@ -150,7 +174,7 @@ Rol: @Context.Session.GetString("Rol")
                     }
                 </p>
 
-                @if (Model.Durum == "Bekliyor")
+                @if (Model.Talep.Durum == "Bekliyor")
                 {
                     <div class="alert alert-warning">
                         Bu destek talebi henüz işleme alınmamıştır.
@@ -159,11 +183,11 @@ Rol: @Context.Session.GetString("Rol")
                     <a class="btn btn-warning w-100 mb-2"
                        asp-controller="Destek"
                        asp-action="IslemeAl"
-                       asp-route-id="@Model.Id">
-                        İşleme Al
+                       asp-route-id="@Model.Talep.Id">
+                         İşleme Al
                     </a>
                 }
-                else if (Model.Durum == "İşlemde")
+                else if (Model.Talep.Durum == "İşlemde")
                 {
                     <div class="alert alert-info">
                         Bu destek talebi bilgi işlem tarafından incelenmektedir.
@@ -176,24 +200,24 @@ Rol: @Context.Session.GetString("Rol")
                     </div>
                 }
 
-                @if (!string.IsNullOrWhiteSpace(Model.CozumAciklamasi))
+                @if (!string.IsNullOrWhiteSpace(Model.Talep.CozumAciklamasi))
                 {
                     <div class="mt-3">
                         <strong>Çözüm Açıklaması:</strong>
 
                         <div class="border rounded p-3 mt-2 bg-light">
-                            @Model.CozumAciklamasi
+                            @Model.Talep.CozumAciklamasi
                         </div>
                     </div>
                 }
 
-                @if (Model.Durum != "Çözüldü")
+                @if (Model.Talep.Durum != "Çözüldü")
                 {
                     <hr />
 
                     <form asp-controller="Destek" asp-action="CozulduYap" method="post">
 
-                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="id" value="@Model.Talep.Id" />
 
                         <div class="mb-3">
                             <label class="form-label">Çözüm Açıklaması</label>
@@ -228,11 +252,11 @@ else
                 <p>
                     <strong>Durum:</strong>
 
-                    @if (Model.Durum == "Bekliyor")
+                    @if (Model.Talep.Durum == "Bekliyor")
                     {
                         <span class="badge bg-warning text-dark">Bekliyor</span>
                     }
-                    else if (Model.Durum == "İşlemde")
+                    else if (Model.Talep.Durum == "İşlemde")
                     {
                         <span class="badge bg-info text-dark">İşlemde</span>
                     }
@@ -242,14 +266,14 @@ else
                     }
                 </p>
 
-                @if (!string.IsNullOrWhiteSpace(Model.CozumAciklamasi))
+                @if (!string.IsNullOrWhiteSpace(Model.Talep.CozumAciklamasi))
                 {
                     <hr />
 
                     <strong>Bilgi İşlem Açıklaması</strong>
 
                     <div class="border rounded p-3 mt-2 bg-light">
-                        @Model.CozumAciklamasi
+                        @Model.Talep.CozumAciklamasi
                     </div>
                 }
 
@@ -258,4 +282,51 @@ else
     </div>
 }
 
+</div>
+<hr />
+
+<div class="card mt-4">
+    <div class="card-header bg-dark text-white">
+        <strong>İşlem Geçmişi</strong>
+    </div>
+
+    <div class="card-body">
+
+        @if (Model.Loglar.Any())
+        {
+            <table class="table table-striped">
+
+                <thead>
+
+                    <tr>
+                        <th>Tarih</th>
+                        <th>Kullanıcı</th>
+                        <th>İşlem</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                @foreach (var log in Model.Loglar)
+                {
+                    <tr>
+                        <td>@log.Tarih.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@log.KullaniciAdi</td>
+                        <td>@log.Islem</td>
+                    </tr>
+                }
+
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-secondary">
+                Bu talep için henüz işlem kaydı bulunmamaktadır.
+            </div>
+        }
+
+    </div>
 </div>

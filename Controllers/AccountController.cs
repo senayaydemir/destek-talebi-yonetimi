@@ -33,14 +33,44 @@ namespace DestekTalebiYonetimi.Controllers
 HttpContext.Session.SetString("KullaniciAdi", kullanici.KullaniciAdi);
 HttpContext.Session.SetString("AdSoyad", kullanici.AdSoyad);
 HttpContext.Session.SetString("Rol", kullanici.Rol);
+_context.KullaniciLoglari.Add(new KullaniciLog
+{
+    KullaniciAdi = kullanici.KullaniciAdi,
+    AdSoyad = kullanici.AdSoyad,
+    Rol = kullanici.Rol,
+    Islem = "Giriş Yaptı",
+    Tarih = DateTime.Now,
+    IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString()
+});
 
+_context.SaveChanges();
             return RedirectToAction("Index", "Home");
         }
 
-        public IActionResult Logout()
+     public IActionResult Logout()
+{
+    var kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
+    var adSoyad = HttpContext.Session.GetString("AdSoyad");
+    var rol = HttpContext.Session.GetString("Rol");
+
+    if (!string.IsNullOrEmpty(kullaniciAdi))
+    {
+        _context.KullaniciLoglari.Add(new KullaniciLog
         {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
-        }
+            KullaniciAdi = kullaniciAdi,
+            AdSoyad = adSoyad ?? "",
+            Rol = rol ?? "",
+            Islem = "Çıkış Yaptı",
+            Tarih = DateTime.Now,
+            IpAdresi = HttpContext.Connection.RemoteIpAddress?.ToString()
+        });
+
+        _context.SaveChanges();
+    }
+
+    HttpContext.Session.Clear();
+
+    return RedirectToAction("Login");
+}
     }
 }
