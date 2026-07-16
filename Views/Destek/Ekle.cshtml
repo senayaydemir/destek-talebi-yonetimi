@@ -2,11 +2,10 @@
 
 @{
     ViewData["Title"] = "Yeni Destek Talebi";
-   
 }
 
 <h2>Yeni Destek Talebi Oluştur</h2>
- <p><strong>Giriş yapan kullanıcı:</strong> @ViewBag.Kullanici</p>
+<p><strong>Giriş yapan kullanıcı:</strong> @ViewBag.Kullanici</p>
 <p class="text-muted">
     Sistem girişi, kullanıcı yetkisi, uygulama hatası ve belediye otomasyonlarında yaşanan destek ihtiyaçları için talep oluşturabilirsiniz.
 </p>
@@ -90,6 +89,26 @@
         </select>
     </div>
 
+    <div class="mb-4">
+        <label class="form-label fw-bold">📎 Dosya Ekle</label>
+        
+        <div id="dropArea" class="border border-2 rounded p-4 text-center bg-light" style="cursor:pointer;">
+            <h5>📂 Dosyaları buraya sürükleyip bırakın</h5>
+            <p class="text-muted mb-2">veya</p>
+            <button type="button" id="btnDosyaSec" class="btn btn-primary">Dosya Seç</button>
+            <input type="file" id="dosyaInput" name="dosyalar" multiple hidden />
+            
+            <div class="small text-muted mt-3">
+                Desteklenen Dosyalar: JPG, PNG, PDF, DOCX, XLSX
+            </div>
+        </div>
+
+        <div id="dosyaListesi" class="mt-3"></div>
+        <small class="text-muted d-block mt-2">
+            Ekran görüntüsü, PDF, Word veya Excel dosyası yükleyebilirsiniz.
+        </small>
+    </div>
+
     <button type="submit" class="btn btn-primary">
         Talebi Kaydet
     </button>
@@ -98,130 +117,120 @@
         Listeye Dön
     </a>
 
-    <div class="mb-3">
-    <label class="form-label">Dosya Ekle</label>
-    <div class="mb-3">
-
-    <label class="form-label fw-bold">
-        📎 Dosya Ekle
-    </label>
-
-    <div id="dropArea"
-         class="border border-2 rounded p-4 text-center bg-light"
-         style="cursor:pointer;">
-
-        <h5>📂 Dosyaları buraya sürükleyip bırakın</h5>
-
-        <p class="text-muted mb-2">
-            veya
-        </p>
-
-        <button type="button"
-                id="btnDosyaSec"
-                class="btn btn-primary">
-            Dosya Seç
-        </button>
-
-        <input
-            type="file"
-            id="dosyaInput"
-            name="dosyalar"
-            multiple
-            hidden />
-
-        <div class="small text-muted mt-3">
-            Desteklenen Dosyalar:
-            JPG, PNG, PDF, DOCX, XLSX
-        </div>
-
-    </div>
-
-</div>
-
-<div id="dosyaListesi" class="mt-3"></div>
-    <small class="text-muted">
-        Ekran görüntüsü, PDF, Word veya Excel dosyası yükleyebilirsiniz.
-    </small>
-</div> 
 </form>
 
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-
         const dosyaInput = document.getElementById("dosyaInput");
         const btnDosyaSec = document.getElementById("btnDosyaSec");
         const dosyaListesi = document.getElementById("dosyaListesi");
+        const dropArea = document.getElementById("dropArea");
 
         let secilenDosyalar = [];
 
-        btnDosyaSec.addEventListener("click", function () {
+        // Tarayıcının sürüklenen dosyayı yeni sekmede açma refleksini global olarak engelle
+        window.addEventListener("dragover", function (e) {
+            e.preventDefault();
+        }, false);
+
+        window.addEventListener("drop", function (e) {
+            e.preventDefault();
+        }, false);
+
+        // Dosya Seç butonuna tıklanınca tetikleme (üst elementlere yayılmasını engelledik)
+        btnDosyaSec.addEventListener("click", function (e) {
+            e.stopPropagation();
             dosyaInput.click();
         });
 
-        dosyaInput.addEventListener("change", function () {
+        // Alana tıklandığında (buton haricinde bir yere tıklandıysa) dosya penceresini aç
+        dropArea.addEventListener("click", function (e) {
+            if (e.target !== btnDosyaSec) {
+                dosyaInput.click();
+            }
+        });
 
+        // Dosya normal yolla (pencereden) seçildiğinde listenin güncellenmesi
+        dosyaInput.addEventListener("change", function () {
             for (let i = 0; i < this.files.length; i++) {
                 secilenDosyalar.push(this.files[i]);
             }
-
+            inputuGuncelle();
             listeyiGuncelle();
-
         });
 
-        function listeyiGuncelle() {
+        // Sürükle-bırak olayları için varsayılan tarayıcı engellemeleri
+        ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+            dropArea.addEventListener(eventName, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
 
+        // Sürüklerken görsel feedback efektleri
+        dropArea.addEventListener("dragover", function () {
+            dropArea.classList.add("border-primary");
+            dropArea.classList.add("bg-white");
+        });
+
+        dropArea.addEventListener("dragleave", function () {
+            dropArea.classList.remove("border-primary");
+            dropArea.classList.remove("bg-white");
+        });
+
+        // Sürüklenen dosya bırakıldığında listeye eklenmesi
+        dropArea.addEventListener("drop", function (e) {
+            dropArea.classList.remove("border-primary");
+            dropArea.classList.remove("bg-white");
+
+            const yeniDosyalar = e.dataTransfer.files;
+            
+            if (yeniDosyalar.length > 0) {
+                for (let i = 0; i < yeniDosyalar.length; i++) {
+                    secilenDosyalar.push(yeniDosyalar[i]);
+                }
+                inputuGuncelle();
+                listeyiGuncelle();
+            }
+        });
+
+        // Seçilen dosyaların HTML listesini oluşturur
+        function listeyiGuncelle() {
             dosyaListesi.innerHTML = "";
 
             secilenDosyalar.forEach(function (dosya, index) {
-
                 dosyaListesi.innerHTML += `
                     <div class="card mb-2">
                         <div class="card-body d-flex justify-content-between align-items-center">
-
                             <div>
-
                                 📄 <strong>${dosya.name}</strong><br>
-
                                 <small>${(dosya.size / 1024).toFixed(2)} KB</small>
-
                             </div>
-
-                            <button
-                                type="button"
-                                class="btn btn-danger btn-sm"
-                                onclick="dosyaSil(${index})">
-
+                            <button type="button" class="btn btn-danger btn-sm" onclick="dosyaSil(${index})">
                                 🗑 Kaldır
-
                             </button>
-
                         </div>
                     </div>
                 `;
-
             });
-
         }
 
-        window.dosyaSil = function (index) {
-
-            secilenDosyalar.splice(index, 1);
-
+        // Seçilen dosyaları, controller'a gidecek olan gizli input.files alanıyla senkronize eder
+        function inputuGuncelle() {
             const dataTransfer = new DataTransfer();
-
             secilenDosyalar.forEach(function (x) {
                 dataTransfer.items.add(x);
             });
-
             dosyaInput.files = dataTransfer.files;
-
-            listeyiGuncelle();
-
         }
 
+        // Listeden dosya silme
+        window.dosyaSil = function (index) {
+            secilenDosyalar.splice(index, 1);
+            inputuGuncelle();
+            listeyiGuncelle();
+        }
     </script>
-
 }
