@@ -1,0 +1,72 @@
+@model DestekTalebiYonetimi.Models.Kullanici
+
+@{
+    ViewData["Title"] = "Kullanıcı Ekle";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="row">
+
+        <div class="col-lg-3">
+            <partial name="_YonetimMenu" />
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-success text-white">
+                    <h4>➕ Yeni Kullanıcı</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <form asp-action="KullaniciEkle">
+
+                        <div class="mb-3">
+                            <label>Ad Soyad</label>
+                            <input asp-for="AdSoyad" class="form-control"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Kullanıcı Adı</label>
+                            <input asp-for="KullaniciAdi" class="form-control"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Şifre</label>
+                            <input asp-for="Sifre" class="form-control"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Rol</label>
+
+                            <select asp-for="Rol" class="form-select">
+                                <option>Personel</option>
+                                <option>BilgiIslem</option>
+                                <option>Yonetici</option>
+                            </select>
+
+                        </div>
+
+                        <button class="btn btn-success">
+                            Kaydet
+                        </button>
+
+                        <a asp-action="Kullanicilar"
+                           class="btn btn-secondary">
+                            İptal
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

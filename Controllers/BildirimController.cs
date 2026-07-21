@@ -27,31 +27,36 @@ public class BildirimController : Controller
     return View(bildirimler);
 }
 
-    [HttpGet]
-    public IActionResult SonBildirimler()
+   [HttpGet]
+public IActionResult SonBildirimler()
+{
+    var rol = HttpContext.Session.GetString("Rol");
+    var kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
+
+    var bildirimler = _context.Bildirimler
+        .Where(x => x.Rol == rol || x.KullaniciAdi == kullaniciAdi)
+        .OrderByDescending(x => x.Tarih)
+        .Take(5)
+        .Select(x => new
+        {
+            x.Id,
+            x.Mesaj,
+            x.Tarih,
+            x.Okundu,
+            x.DestekTalebiId
+        })
+        .ToList();
+
+    var okunmamisSayi = _context.Bildirimler.Count(x =>
+        (x.Rol == rol || x.KullaniciAdi == kullaniciAdi)
+        && !x.Okundu);
+
+    return Json(new
     {
-        var rol = HttpContext.Session.GetString("Rol");
-        var kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
-
-        var bildirimler = _context.Bildirimler
-           .Where(x =>
-    x.Rol == rol ||
-    x.KullaniciAdi == kullaniciAdi)
-            .OrderByDescending(x => x.Tarih)
-            .Take(5)
-            .Select(x => new
-            {
-                x.Id,
-                x.Mesaj,
-                x.Tarih,
-                x.Okundu,
-                x.DestekTalebiId
-            })
-            .ToList();
-
-        return Json(bildirimler);
-    }
-
+        Bildirimler = bildirimler,
+        OkunmamisSayi = okunmamisSayi
+    });
+}
     [HttpPost]
     public IActionResult OkunduYap(int id)
     {

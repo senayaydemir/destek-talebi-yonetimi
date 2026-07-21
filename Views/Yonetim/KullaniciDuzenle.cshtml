@@ -1,0 +1,79 @@
+@model DestekTalebiYonetimi.Models.Kullanici
+
+@{
+    ViewData["Title"] = "Kullanıcı Düzenle";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="row">
+
+        <div class="col-lg-3">
+            <partial name="_YonetimMenu" />
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">
+                        ✏️ Kullanıcı Düzenle
+                    </h4>
+                </div>
+
+                <div class="card-body">
+
+                    <form asp-action="KullaniciDuzenle">
+
+                        <input type="hidden" asp-for="Id"/>
+
+                        <div class="mb-3">
+                            <label>Ad Soyad</label>
+                            <input asp-for="AdSoyad" class="form-control"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Kullanıcı Adı</label>
+                            <input asp-for="KullaniciAdi" class="form-control"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Şifre</label>
+                            <input asp-for="Sifre" class="form-control"/>
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label>Rol</label>
+
+                            <select asp-for="Rol" class="form-select">
+
+                                <option value="Personel">Personel</option>
+                                <option value="BilgiIslem">Bilgi İşlem</option>
+                                <option value="Yonetici">Yönetici</option>
+
+                            </select>
+
+                        </div>
+
+                        <button class="btn btn-warning">
+                            Güncelle
+                        </button>
+
+                        <a asp-action="Kullanicilar"
+                           class="btn btn-secondary">
+                            İptal
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

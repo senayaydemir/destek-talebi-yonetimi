@@ -65,6 +65,16 @@
                                 Destek Talepleri
                             </a>
                         </li>
+                        @if (Context.Session.GetString("Rol") == "Yonetici")
+{
+    <li class="nav-item">
+        <a class="nav-link"
+           asp-controller="Yonetim"
+           asp-action="Index">
+            🛠 Yönetici Paneli
+        </a>
+    </li>
+}
                     </ul>
                 }
 
@@ -188,6 +198,17 @@
 audio.play();
 
 });
+connection.on("YeniMesaj", function () {
+
+    if (window.location.pathname.includes("/Destek/Detay")) {
+
+        if (typeof mesajlariYukle === "function") {
+            mesajlariYukle();
+        }
+
+    }
+
+});
     connection.start()
         .then(() => console.log("SignalR bağlandı"))
         .catch(err => console.error(err));
@@ -201,12 +222,11 @@ audio.play();
         try {
             const response = await fetch("/Bildirim/SonBildirimler");
             const data = await response.json();
-
-            sayi.innerText = data.length;
+            sayi.innerText = data.okunmamisSayi;
 
             let html = "";
 
-            if (data.length === 0) {
+            if (data.bildirimler.length === 0) {
                 html = `
                 <li>
                     <span class="dropdown-item-text">
@@ -214,7 +234,7 @@ audio.play();
                     </span>
                 </li>`;
             } else {
-                data.forEach(x => {
+                data.bildirimler.forEach(x => {
                 html += `
 <li>
     <a class="dropdown-item bildirim-link text-wrap py-3"

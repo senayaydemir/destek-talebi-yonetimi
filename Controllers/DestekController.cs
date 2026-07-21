@@ -203,7 +203,17 @@ ViewBag.KullaniciAdi = kullanici;
 return View(viewModel);
 }
 
-
+[HttpGet]
+public IActionResult MesajlariGetir(int destekTalebiId)
+{
+    var mesajlar = _context.Mesajlar
+        .Where(x => x.DestekTalebiId == destekTalebiId)
+        .OrderBy(x => x.Tarih)
+        .ToList();
+var kullaniciAdi = HttpContext.Session.GetString("KullaniciAdi");
+ViewBag.KullaniciAdi = kullaniciAdi;
+    return PartialView("_MesajlarPartial", mesajlar);
+}
        
 
     public IActionResult Duzenle(int id)
@@ -385,11 +395,12 @@ _context.SaveChanges();
             }
         }
     }
-    [HttpPost]
+   
 [HttpPost]
 public async Task<IActionResult> MesajGonder(int destekTalebiId, string mesaj)
 {
     var kullanici = HttpContext.Session.GetString("KullaniciAdi");
+    var rol = HttpContext.Session.GetString("Rol");
 
     if (string.IsNullOrWhiteSpace(kullanici))
     {
@@ -401,6 +412,15 @@ public async Task<IActionResult> MesajGonder(int destekTalebiId, string mesaj)
         return RedirectToAction("Detay", new { id = destekTalebiId });
     }
 
+    var talep = _context.DestekTalepleri
+        .FirstOrDefault(x => x.Id == destekTalebiId);
+
+    if (talep == null)
+    {
+        return NotFound();
+    }
+
+    // Mesajı ekle
     _context.Mesajlar.Add(new Mesaj
     {
         DestekTalebiId = destekTalebiId,
@@ -409,7 +429,63 @@ public async Task<IActionResult> MesajGonder(int destekTalebiId, string mesaj)
         Tarih = DateTime.Now
     });
 
+    // Bildirimi ekle
+    if (rol == "Personel")
+    {
+        _context.Bildirimler.Add(new Bildirim
+        {
+            Rol = "BilgiIslem",
+            Mesaj = $"{kullanici}, Destek Talebi #{destekTalebiId} için yeni mesaj gönderdi.",
+            Okundu = false,
+            Tarih = DateTime.Now,
+            DestekTalebiId = destekTalebiId
+        });
+
+        _context.Bildirimler.Add(new Bildirim
+        {
+            Rol = "Yonetici",
+            Mesaj = $"{kullanici}, Destek Talebi #{destekTalebiId} için yeni mesaj gönderdi.",
+            Okundu = false,
+            Tarih = DateTime.Now,
+            DestekTalebiId = destekTalebiId
+        });
+    }
+    else
+    {
+        _context.Bildirimler.Add(new Bildirim
+        {
+            KullaniciAdi = talep.OlusturanKullanici,
+            Mesaj = $"Destek Talebi #{destekTalebiId} için yeni mesajınız var.",
+            Okundu = false,
+            Tarih = DateTime.Now,
+            DestekTalebiId = destekTalebiId
+        });
+    }
+
+    // Her şeyi tek seferde kaydet
     _context.SaveChanges();
+
+    // Kaydettikten sonra SignalR bildirimi gönder
+    if (rol == "Personel")
+    {
+        await _hubContext.Clients.Group("BilgiIslem")
+            .SendAsync("YeniBildirim");
+
+        await _hubContext.Clients.Group("Yonetici")
+            .SendAsync("YeniBildirim");
+            await _hubContext.Clients.Group("BilgiIslem")
+    .SendAsync("YeniMesaj");
+
+await _hubContext.Clients.Group("Yonetici")
+    .SendAsync("YeniMesaj");
+    }
+    else
+    {
+        await _hubContext.Clients.Group($"USER_{talep.OlusturanKullanici}")
+            .SendAsync("YeniBildirim");
+            await _hubContext.Clients.Group($"USER_{talep.OlusturanKullanici}")
+    .SendAsync("YeniMesaj");
+    }
 
     return RedirectToAction("Detay", new { id = destekTalebiId });
 }

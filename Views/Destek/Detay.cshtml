@@ -339,6 +339,7 @@ else
     </div>
 
     <div class="card-body">
+    <div id="mesajlarAlani">
 
     @if (Model.Mesajlar.Any())
 {
@@ -375,7 +376,7 @@ else
                 Henüz mesaj bulunmuyor.
             </div>
         }
-
+</div>
         <hr />
 
         <form asp-controller="Destek"
@@ -404,3 +405,23 @@ else
     </div>
 
 </div>
+@section Scripts
+{
+    <script>
+        async function mesajlariYukle() {
+
+            const talepId = @Model.Talep.Id;
+
+            const response = await fetch('/Destek/MesajlariGetir?destekTalebiId=' + talepId);
+
+            const html = await response.text();
+
+            document.getElementById("mesajlarAlani").innerHTML = html;
+        }
+        connection.on("YeniMesaj", function () {
+
+    mesajlariYukle();
+
+});
+    </script>
+}

@@ -1,0 +1,60 @@
+@{
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<div class="card shadow border-0">
+
+    <div class="card-header bg-primary text-white text-center">
+        <h5 class="mb-0">
+            🛠 Yönetim Paneli
+        </h5>
+    </div>
+
+    <div class="list-group list-group-flush">
+
+        <a asp-controller="Yonetim"
+           asp-action="Index"
+           class="list-group-item list-group-item-action @(action=="Index" ? "active" : "")">
+            📊 Dashboard
+        </a>
+
+        <a asp-controller="Yonetim"
+           asp-action="Kullanicilar"
+           class="list-group-item list-group-item-action @(action=="Kullanicilar" ? "active" : "")">
+            👥 Kullanıcı Yönetimi
+        </a>
+
+        <a href="#"
+           class="list-group-item list-group-item-action">
+            📂 Kategori Yönetimi
+            <span class="badge bg-secondary float-end">Yakında</span>
+        </a>
+
+        <a href="#"
+           class="list-group-item list-group-item-action">
+            🏢 Birim Yönetimi
+            <span class="badge bg-secondary float-end">Yakında</span>
+        </a>
+
+        <a href="#"
+           class="list-group-item list-group-item-action">
+            📈 Raporlar
+            <span class="badge bg-secondary float-end">Yakında</span>
+        </a>
+
+        <a href="#"
+           class="list-group-item list-group-item-action">
+            📝 Sistem Logları
+            <span class="badge bg-secondary float-end">Yakında</span>
+        </a>
+
+        <a href="#"
+           class="list-group-item list-group-item-action">
+            ⚙️ Ayarlar
+            <span class="badge bg-secondary float-end">Yakında</span>
+        </a>
+
+    </div>
+
+</div>

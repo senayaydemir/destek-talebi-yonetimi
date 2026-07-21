@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "Yönetici Paneli";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="row">
+
+        <!-- SOL MENÜ -->
+        <div class="col-lg-3 mb-4">
+            <partial name="_YonetimMenu" />
+        </div>
+
+        <!-- SAĞ TARAF -->
+        <div class="col-lg-9">
+
+            <h2 class="mb-4">
+                📊 Dashboard
+            </h2>
+
+            <div class="row">
+
+                <div class="col-md-6 col-xl-3 mb-4">
+                    <div class="card shadow border-0 h-100">
+                        <div class="card-body text-center">
+
+                            <div style="font-size:45px;">👥</div>
+
+                            <h5 class="mt-3">
+                                Toplam Kullanıcı
+                            </h5>
+
+                            <h2 class="fw-bold text-primary">
+                                @ViewBag.ToplamKullanici
+                            </h2>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-4">
+                    <div class="card shadow border-0 h-100">
+                        <div class="card-body text-center">
+
+                            <div style="font-size:45px;">📋</div>
+
+                            <h5 class="mt-3">
+                                Toplam Talep
+                            </h5>
+
+                            <h2 class="fw-bold text-success">
+                                @ViewBag.ToplamTalep
+                            </h2>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-4">
+                    <div class="card shadow border-0 h-100">
+                        <div class="card-body text-center">
+
+                            <div style="font-size:45px;">⏳</div>
+
+                            <h5 class="mt-3">
+                                Bekleyen Talepler
+                            </h5>
+
+                            <h2 class="fw-bold text-warning">
+                                @ViewBag.BekleyenTalep
+                            </h2>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-4">
+                    <div class="card shadow border-0 h-100">
+                        <div class="card-body text-center">
+
+                            <div style="font-size:45px;">✅</div>
+
+                            <h5 class="mt-3">
+                                Çözülen Talepler
+                            </h5>
+
+                            <h2 class="fw-bold text-success">
+                                @ViewBag.CozulenTalep
+                            </h2>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card shadow-sm mt-4">
+
+                <div class="card-header bg-primary text-white">
+                    <strong>📢 Yönetici Bilgilendirmesi</strong>
+                </div>
+
+                <div class="card-body">
+
+                    <p>
+                        Yönetici paneline hoş geldiniz.
+                    </p>
+
+                    <ul class="mb-0">
+                        <li>👥 Kullanıcıları yönetebilirsiniz.</li>
+                        <li>📂 Kategorileri yönetebilirsiniz.</li>
+                        <li>🏢 Birimleri yönetebilirsiniz.</li>
+                        <li>📈 Raporları görüntüleyebilirsiniz.</li>
+                        <li>📝 Sistem loglarını inceleyebilirsiniz.</li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
