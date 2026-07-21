@@ -1,5 +1,6 @@
 using DestekTalebiYonetimi.Data;
 using Microsoft.EntityFrameworkCore;
+using DestekTalebiYonetimi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSignalR();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -41,5 +42,5 @@ app.MapStaticAssets();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
-
+app.MapHub<NotificationHub>("/notificationHub");
 app.Run();

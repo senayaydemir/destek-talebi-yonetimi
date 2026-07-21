@@ -1,6 +1,8 @@
 using DestekTalebiYonetimi.Filters;
 using DestekTalebiYonetimi.Data;
 using DestekTalebiYonetimi.Models;
+using Microsoft.AspNetCore.SignalR;
+using DestekTalebiYonetimi.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using ClosedXML.Excel;
@@ -12,11 +14,15 @@ namespace DestekTalebiYonetimi.Controllers;
 public class DestekController : Controller
 {
     private readonly AppDbContext _context;
+private readonly IHubContext<NotificationHub> _hubContext;
 
-    public DestekController(AppDbContext context)
-    {
-        _context = context;
-    }
+    public DestekController(
+    AppDbContext context,
+    IHubContext<NotificationHub> hubContext)
+{
+    _context = context;
+    _hubContext = hubContext;
+}
 
     public IActionResult Index(string? durum, string? arama)
     {
@@ -65,19 +71,32 @@ public class DestekController : Controller
         return View(talepler);
     }
 
-    public IActionResult Ekle()
+public IActionResult Ekle()
+{
+    if (HttpContext.Session.GetString("KullaniciAdi") == null)
     {
-        ViewBag.Kullanici = HttpContext.Session.GetString("KullaniciAdi");
-        return View();
+        return RedirectToAction("Login", "Account");
     }
 
-    [HttpPost]
-    public IActionResult Ekle(DestekTalebi destekTalebi, List<IFormFile>? dosyalar)
+    if (HttpContext.Session.GetString("Rol") != "Personel")
+    {
+        return RedirectToAction("Index");
+    }
+
+    ViewBag.Kullanici = HttpContext.Session.GetString("KullaniciAdi");
+    return View();
+}
+[HttpPost]
+public async Task<IActionResult> Ekle(DestekTalebi destekTalebi, List<IFormFile>? dosyalar)
     {
         if (HttpContext.Session.GetString("KullaniciAdi") == null)
         {
             return RedirectToAction("Login", "Account");
         }
+        if (HttpContext.Session.GetString("Rol") != "Personel")
+{
+    return RedirectToAction("Index");
+}
 
         if (!ModelState.IsValid)
         {
@@ -91,7 +110,17 @@ destekTalebi.OlusturanKullanici = HttpContext.Session.GetString("KullaniciAdi");
 
 _context.DestekTalepleri.Add(destekTalebi);
 _context.SaveChanges();
+_context.Bildirimler.Add(new Bildirim
+{
+    Rol = "BilgiIslem",
+    Mesaj = $"{destekTalebi.TalepEden} tarafından yeni destek talebi oluşturuldu.",
+    Okundu = false,
+    Tarih = DateTime.Now,
+    DestekTalebiId = destekTalebi.Id
+});
 
+_context.SaveChanges();
+await _hubContext.Clients.All.SendAsync("YeniBildirim");
 if (dosyalar != null)
 {
     foreach (var dosya in dosyalar)
@@ -151,7 +180,7 @@ public IActionResult Detay(int id)
     {
         return RedirectToAction("Index");
     }
-
+ViewBag.KullaniciAdi = kullanici;
     var viewModel = new DestekDetayViewModel
 {
     Talep = talep,
@@ -164,7 +193,11 @@ public IActionResult Detay(int id)
     Dosyalar = _context.DestekTalepDosyalari
         .Where(x => x.DestekTalebiId == id)
         .OrderBy(x => x.YuklenmeTarihi)
-        .ToList()
+        .ToList(),
+        Mesajlar = _context.Mesajlar
+    .Where(x => x.DestekTalebiId == id)
+    .OrderBy(x => x.Tarih)
+    .ToList()
 };
 
 return View(viewModel);
@@ -267,6 +300,16 @@ LogEkle(mevcutTalep.Id, "Talep düzenlendi");
             talep.CozumAciklamasi = cozumAciklamasi ?? string.Empty;
             _context.SaveChanges();
             LogEkle(talep.Id, "Talep çözüldü");
+            _context.Bildirimler.Add(new Bildirim
+{
+    KullaniciAdi = talep.OlusturanKullanici,
+    Mesaj = $"'{talep.Baslik}' destek talebiniz çözüldü.",
+    Okundu = false,
+    Tarih = DateTime.Now,
+    DestekTalebiId = talep.Id
+});
+
+_context.SaveChanges();
         }
 
         return RedirectToAction("Index");
@@ -342,6 +385,34 @@ _context.SaveChanges();
             }
         }
     }
+    [HttpPost]
+[HttpPost]
+public async Task<IActionResult> MesajGonder(int destekTalebiId, string mesaj)
+{
+    var kullanici = HttpContext.Session.GetString("KullaniciAdi");
+
+    if (string.IsNullOrWhiteSpace(kullanici))
+    {
+        return RedirectToAction("Login", "Account");
+    }
+
+    if (string.IsNullOrWhiteSpace(mesaj))
+    {
+        return RedirectToAction("Detay", new { id = destekTalebiId });
+    }
+
+    _context.Mesajlar.Add(new Mesaj
+    {
+        DestekTalebiId = destekTalebiId,
+        Gonderen = kullanici,
+        MesajMetni = mesaj,
+        Tarih = DateTime.Now
+    });
+
+    _context.SaveChanges();
+
+    return RedirectToAction("Detay", new { id = destekTalebiId });
+}
     private void LogEkle(int talepId, string islem)
 {
     _context.DestekTalepLoglari.Add(new DestekTalepLog

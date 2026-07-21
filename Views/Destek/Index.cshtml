@@ -113,20 +113,23 @@ else
 
 <div class="d-flex justify-content-between mb-3">
 
-    <a class="btn btn-primary"
-       asp-controller="Destek"
-       asp-action="Ekle">
-        ➕ Yeni Destek Talebi Oluştur
-    </a>
+    @if (ViewBag.Rol == "Personel")
+    {
+        <a class="btn btn-primary"
+           asp-controller="Destek"
+           asp-action="Ekle">
+            ➕ Yeni Destek Talebi Oluştur
+        </a>
+    }
 
-   @if (ViewBag.Rol == "BilgiIslem" || ViewBag.Rol == "Yonetici")
-{
-    <a class="btn btn-success"
-       asp-controller="Destek"
-       asp-action="ExceleAktar">
-        📊 Excel'e Aktar
-    </a>
-}
+    @if (ViewBag.Rol == "BilgiIslem" || ViewBag.Rol == "Yonetici")
+    {
+        <a class="btn btn-success"
+           asp-controller="Destek"
+           asp-action="ExceleAktar">
+            📊 Excel'e Aktar
+        </a>
+    }
 
 </div>
 

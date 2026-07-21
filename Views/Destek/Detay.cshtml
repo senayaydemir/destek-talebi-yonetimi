@@ -330,3 +330,77 @@ else
 
     </div>
 </div>
+<hr />
+
+<div class="card mt-4">
+
+    <div class="card-header bg-primary text-white">
+        <strong>💬 Canlı Sohbet</strong>
+    </div>
+
+    <div class="card-body">
+
+    @if (Model.Mesajlar.Any())
+{
+    @foreach (var mesaj in Model.Mesajlar)
+    {
+        var benimMesajim = mesaj.Gonderen == (string?)ViewBag.KullaniciAdi;
+
+        <div class="d-flex @(benimMesajim ? "justify-content-end" : "justify-content-start") mb-3">
+
+            <div class="p-3 rounded shadow-sm"
+                 style="max-width:70%; background-color:@(benimMesajim ? "#DCF8C6" : "#F1F1F1");">
+
+                <div class="fw-bold mb-1">
+                    @mesaj.Gonderen
+                </div>
+
+                <div>
+                    @mesaj.MesajMetni
+                </div>
+
+                <div class="text-end text-muted mt-2" style="font-size:12px;">
+                    @mesaj.Tarih.ToString("HH:mm")
+                </div>
+
+            </div>
+
+        </div>
+    }
+}
+else
+
+        {
+            <div class="alert alert-light">
+                Henüz mesaj bulunmuyor.
+            </div>
+        }
+
+        <hr />
+
+        <form asp-controller="Destek"
+              asp-action="MesajGonder"
+              method="post">
+
+            <input type="hidden"
+                   name="destekTalebiId"
+                   value="@Model.Talep.Id" />
+
+            <div class="mb-3">
+
+                <textarea class="form-control"
+                          name="mesaj"
+                          rows="3"
+                          placeholder="Mesajınızı yazın..."></textarea>
+
+            </div>
+
+            <button class="btn btn-primary">
+                Gönder
+            </button>
+
+        </form>
+
+    </div>
+
+</div>

@@ -1,0 +1,93 @@
+@model List<DestekTalebiYonetimi.Models.Bildirim>
+
+@{
+    ViewData["Title"] = "Bildirimler";
+}
+
+<h2 class="mb-4">🔔 Bildirimler</h2>
+<form asp-action="TumunuOkunduYap" method="post" class="mb-3">
+    <button type="submit" class="btn btn-success">
+        ✓ Tümünü Okundu Yap
+    </button>
+</form>
+<form asp-action="TumunuSil" method="post" style="display:inline;">
+    <button type="submit"
+            class="btn btn-danger"
+            onclick="return confirm('Tüm bildirimleri silmek istediğinize emin misiniz?');">
+        🗑️ Tüm Bildirimleri Sil
+    </button>
+</form>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Henüz bildirim bulunmuyor.
+    </div>
+}
+else
+{
+    foreach (var item in Model.OrderByDescending(x => x.Tarih))
+    {
+        <div class="card mb-3 shadow-sm">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between">
+
+                    <div>
+
+                        <h5 class="card-title">
+
+                            @if (!item.Okundu)
+                            {
+                                <span class="text-primary">🔵</span>
+                            }
+
+                            @item.Mesaj
+
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            @item.Tarih.ToString("dd.MM.yyyy HH:mm")
+                        </p>
+
+                    </div>
+
+                    <div>
+
+                        <span class="badge @(item.Okundu ? "bg-success" : "bg-warning text-dark")">
+
+                            @(item.Okundu ? "Okundu" : "Okunmadı")
+
+                        </span>
+
+                        @if (item.DestekTalebiId != null)
+                        {
+                            <br />
+                            <a asp-controller="Destek"
+                               asp-action="Detay"
+                               asp-route-id="@item.DestekTalebiId"
+                               class="btn btn-primary btn-sm mt-2">
+
+                                Talebe Git
+
+                            </a>
+                            <form asp-action="Sil" method="post" style="display:inline;">
+    <input type="hidden" name="id" value="@item.Id" />
+
+    <button type="submit"
+            class="btn btn-sm btn-danger"
+            onclick="return confirm('Bu bildirimi silmek istediğinize emin misiniz?');">
+        🗑️ Sil
+    </button>
+</form>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+}

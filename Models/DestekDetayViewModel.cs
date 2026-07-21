@@ -9,5 +9,6 @@ namespace DestekTalebiYonetimi.Models
         public List<DestekTalepLog> Loglar { get; set; } = new();
 
         public List<DestekTalepDosya> Dosyalar { get; set; } = new();
+        public List<Mesaj> Mesajlar { get; set; } = new();
     }
 }

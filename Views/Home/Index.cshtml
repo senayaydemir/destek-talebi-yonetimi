@@ -22,27 +22,30 @@
     }
 
 </div>
+<div class="row @(ViewBag.Rol == "Personel" ? "justify-content-center" : "justify-content-center")">
 
-<div class="row @(ViewBag.Rol == "Personel" ? "justify-content-center" : "")">
+    @if (ViewBag.Rol == "Personel")
+    {
+        <div class="col-md-5">
 
-    <div class="@(ViewBag.Rol == "Personel" ? "col-md-5" : "col-md-4")">
-        <div class="card text-center mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Talep Oluştur</h5>
+            <div class="card text-center mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Talep Oluştur</h5>
 
-                <p class="card-text">
-                    Personel yaşadığı sistemsel problemi destek talebi olarak iletebilir.
-                </p>
+                    <p class="card-text">
+                        Personel yaşadığı sistemsel problemi destek talebi olarak iletebilir.
+                    </p>
 
-                <a class="btn btn-primary"
-                   asp-controller="Destek"
-                   asp-action="Ekle">
-                    Yeni Talep Oluştur
-                </a>
+                    <a class="btn btn-primary"
+                       asp-controller="Destek"
+                       asp-action="Ekle">
+                        Yeni Talep Oluştur
+                    </a>
+                </div>
             </div>
-        </div>
-    </div>
 
+        </div>
+    }
    <div class="@(ViewBag.Rol == "Personel" ? "col-md-5" : "col-md-4")">
         <div class="card text-center mb-3">
             <div class="card-body">
@@ -63,7 +66,7 @@
 
     @if (ViewBag.Rol == "BilgiIslem" || ViewBag.Rol == "Yonetici")
     {
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="card text-center mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Çözüm Sürecini Yönet</h5>
